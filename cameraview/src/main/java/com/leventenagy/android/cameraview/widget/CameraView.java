@@ -1,4 +1,4 @@
-package de.markusfisch.android.cameraview.widget;
+package com.leventenagy.android.cameraview.widget;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;

@@ -1,4 +1,4 @@
-package de.markusfisch.android.cameraviewdemo.activity;
+package com.leventenagy.android.cameraimu.activity;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -18,8 +18,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import de.markusfisch.android.cameraview.widget.CameraView;
-import de.markusfisch.android.cameraviewdemo.R;
+import com.leventenagy.android.cameraimu.R;
+import com.leventenagy.android.cameraview.widget.CameraView;
 
 public class MainActivity extends Activity {
 	private final String[] permissions = new String[] {android.Manifest.permission.CAMERA,android.Manifest.permission.WRITE_EXTERNAL_STORAGE};

@@ -13,7 +13,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 
 android {
-	namespace 'de.markusfisch.android.cameraview'
+	namespace 'com.leventenagy.android.cameraview'
 	compileSdkVersion sdk_version
 
 	defaultConfig {
@@ -30,7 +30,7 @@ afterEvaluate {
 		publications {
 			release(MavenPublication) {
 				from components.release
-				groupId = 'com.github.markusfisch'
+				groupId = 'com.github.leventenagy'
 				artifactId = 'final'
 				version = '1.9.2'
 			}

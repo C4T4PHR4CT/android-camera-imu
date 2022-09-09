@@ -1,4 +1,4 @@
-PACKAGE = de.markusfisch.android.cameraviewdemo
+PACKAGE = leventenagy.android.cameraviewdemo
 
 all: debug install start
 

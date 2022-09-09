@@ -40,7 +40,7 @@ Then add the dependency in your app/build.gradle:
 
 ```groovy
 dependencies {
-	implementation 'com.github.markusfisch:CameraView:1.9.2'
+	implementation 'com.github.leventenagy:CameraView:1.9.2'
 }
 ```
 
@@ -65,7 +65,7 @@ dependencies {
 Add it to a layout:
 
 ```xml
-<de.markusfisch.android.cameraview.widget.CameraView
+<leventenagy.android.cameraview.widget.CameraView
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/camera_view"
 	android:layout_width="match_parent"
@@ -75,9 +75,9 @@ Add it to a layout:
 Or create it in Java:
 
 ```java
-import de.markusfisch.android.cameraview.widget.CameraView;
+import leventenagy.android.cameraview.widget.CameraView;
 
-CameraView cameraView = new CameraView(context);
+CameraView cameraView=new CameraView(context);
 ```
 
 If your app supports *orientation changes*, please also enable the built-in

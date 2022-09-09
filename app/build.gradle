@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-	namespace 'de.markusfisch.android.cameraviewdemo'
+	namespace 'com.leventenagy.android.cameraimu'
 	compileSdkVersion sdk_version
 
 	defaultConfig {
