@@ -17,7 +17,7 @@ android {
 	compileSdkVersion sdk_version
 
 	defaultConfig {
-		minSdkVersion 9
+		minSdkVersion 14
 		targetSdkVersion sdk_version
 
 		versionCode 22

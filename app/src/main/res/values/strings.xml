@@ -1,4 +1,4 @@
 <resources>
-	<string name="app_name">CameraView</string>
+	<string name="app_name">Camera IMU</string>
 	<string name="error_camera">Cannot open camera</string>
 </resources>
