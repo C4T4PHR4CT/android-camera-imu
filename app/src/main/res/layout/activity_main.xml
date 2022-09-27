@@ -42,6 +42,17 @@
             android:src="@android:drawable/presence_invisible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="33dp"
+            android:layout_height="76dp"
+            android:rotation="90"
+            android:textColor="#FF0000"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toStartOf="@+id/imageButton"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_editor_absoluteY="2dp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>

@@ -7,7 +7,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -23,9 +26,11 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -40,11 +45,11 @@ import com.leventenagy.android.cameraimu.R;
 import com.leventenagy.android.cameraview.widget.CameraView;
 
 class SensorData {
-	public String name;
+	public long timestamp;
 	public Object value;
 
-	public SensorData(String name, Object value) {
-		this.name = name;
+	public SensorData(long timestamp, Object value) {
+		this.timestamp = timestamp;
 		this.value = value;
 	}
 }
@@ -59,9 +64,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private static boolean frontFacing = false;
 
 	private static CameraView cameraView;
+	private static TextView countdown;
 
 	private SensorManager sensorManager;
-	private final Map<String, Object> sensors = new HashMap<String, Object>();
+	private Map<String, Object> sensors = new HashMap<String, Object>();
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -122,22 +128,66 @@ public class MainActivity extends Activity implements SensorEventListener {
 				switch(event.getAction()) {
 					case MotionEvent.ACTION_DOWN:
 						button.setColorFilter(Color.argb(150, 150, 150, 150));
-						cameraView.setVisibility(View.GONE);
-						cameraView.getCamera().takePicture(null, null, new Camera.PictureCallback() {
-							@Override
-							public void onPictureTaken(byte[] bytes, Camera camera) {
-								runOnUiThread(new Runnable() {
-									@Override
-									public void run() {
-										cameraView.setVisibility(View.VISIBLE);
-										camera.cancelAutoFocus();
-										camera.startPreview();
-										writeJpg(bytes);
-										writeJson(sensors);
-									}
-								});
+						new Thread() {
+							public void run() {
+								try {
+									runOnUiThread(new Runnable() {
+										@Override
+										public void run() {
+											sensors = new HashMap<String, Object>();
+											countdown.setText("3");
+										}
+									});
+									Thread.sleep(1000);
+									runOnUiThread(new Runnable() {
+										@Override
+										public void run() {
+											countdown.setText("2");
+										}
+									});
+									Thread.sleep(1000);
+									runOnUiThread(new Runnable() {
+										@Override
+										public void run() {
+											countdown.setText("1");
+										}
+									});
+									Thread.sleep(1000);
+									runOnUiThread(new Runnable() {
+										@Override
+										public void run() {
+											countdown.setText("");
+											cameraView.setVisibility(View.GONE);
+											sensors.put("camera_stamp", System.currentTimeMillis());
+											cameraView.getCamera().takePicture(null, null, new Camera.PictureCallback() {
+												@Override
+												public void onPictureTaken(byte[] bytes, Camera camera) {
+													runOnUiThread(new Runnable() {
+														@Override
+														public void run() {
+															cameraView.setVisibility(View.VISIBLE);
+															camera.cancelAutoFocus();
+															camera.startPreview();
+															Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+															Matrix matrix = new Matrix();
+															matrix.postRotate(-90);
+															bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
+															ByteArrayOutputStream stream = new ByteArrayOutputStream();
+															bmp.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+															writeJpg(stream.toByteArray());
+															writeJson(sensors);
+														}
+													});
+												}
+											});
+										}
+									});
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+
 							}
-						});
+						}.start();
 						break;
 					case MotionEvent.ACTION_UP:
 						button.setColorFilter(null);
@@ -162,8 +212,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 			}
 		});
 
+		countdown = (TextView) this.findViewById(R.id.textView);
 		cameraView = (CameraView) this.findViewById(R.id.cameraView);
-		cameraView.setUseOrientationListener(true);
 	}
 
 	@Override
@@ -173,7 +223,21 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	@Override
 	public final void onSensorChanged(SensorEvent event) {
-		sensors.put(event.sensor.getStringType(),event.values);
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				SensorData[] array = (SensorData[])sensors.get(event.sensor.getStringType());
+				if (array == null)
+					array = new SensorData[] {new SensorData(System.currentTimeMillis(), event.values)};
+				else {
+					SensorData[] temp = new SensorData[array.length+1];
+					System.arraycopy(array, 0, temp, 0, array.length);
+					temp[array.length] = new SensorData(System.currentTimeMillis(), event.values);
+					array = temp;
+				}
+				sensors.put(event.sensor.getStringType(),array);
+			}
+		});
 	}
 
 	@Override
@@ -182,10 +246,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 		openCameraView();
 		sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
 		sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER_UNCALIBRATED), SensorManager.SENSOR_DELAY_NORMAL);
-		sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
-		sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE_UNCALIBRATED), SensorManager.SENSOR_DELAY_NORMAL);
-		sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY), SensorManager.SENSOR_DELAY_NORMAL);
-		sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR), SensorManager.SENSOR_DELAY_NORMAL);
+//		sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
+//		sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE_UNCALIBRATED), SensorManager.SENSOR_DELAY_NORMAL);
+//		sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY), SensorManager.SENSOR_DELAY_NORMAL);
+//		sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR), SensorManager.SENSOR_DELAY_NORMAL);
 	}
 
 	@Override
@@ -193,7 +257,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 		super.onPause();
 		closeCameraView();
 		sensorManager.unregisterListener(this);
-
 	}
 
 	private void writeJpg(byte[] value){
