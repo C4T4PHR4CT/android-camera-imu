@@ -496,6 +496,8 @@ public class CameraView extends FrameLayout {
 			int surfaceWidth,
 			int surfaceHeight) {
 		SurfaceView surfaceView = new SurfaceView(context);
+		surfaceView.setZOrderOnTop(false);
+		surfaceView.setZOrderMediaOverlay(false);
 		SurfaceHolder holder = surfaceView.getHolder();
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
 			holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
